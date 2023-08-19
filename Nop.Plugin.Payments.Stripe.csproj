@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Version>1.00</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/andrejpk/Nop.Payments.Stripe</RepositoryUrl>
@@ -10,14 +10,8 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Copyright />
     <RepositoryType>git</RepositoryType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Payments.Stripe</OutputPath>
-    <OutDir>$(OutputPath)</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>C:\src\Repos\nopCommerce\src\Presentation\Nop.Web\Plugins\Payments.Stripe\</OutputPath>
-    <OutDir>$(OutputPath)</OutDir>
+      <OutputPath>..\..\Presentation\Nop.Web\Plugins\Payments.Stripe</OutputPath>
+      <OutDir>$(OutputPath)</OutDir>
   </PropertyGroup>
   <!-- This target execute after "Build" target -->
   <Target Name="NopTarget" AfterTargets="Build">
@@ -53,13 +47,14 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-     <ClearPluginAssemblies Include="$(MSBuildProjectDirectory)\..\..\nopCommerce\src\Build\ClearPluginAssemblies.proj" />
+     <ClearPluginAssemblies Include="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" />
  </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Stripe.net" Version="21.9.0" />
+    <PackageReference Include="Stripe.net" Version="41.10.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\nopCommerce\src\Presentation\Nop.Web\Nop.Web.csproj" />
+    <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+    <ProjectReference Include="..\..\Presentation\Nop.Web\Nop.Web.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="plugin.json">

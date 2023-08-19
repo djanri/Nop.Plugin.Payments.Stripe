@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using FluentValidation.Attributes;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc.Rendering;
 //using Nop.Plugin.Payments.Stripe.Validators;
 using Nop.Web.Framework.Mvc.ModelBinding;
@@ -9,7 +9,7 @@ using Nop.Web.Framework.Models;
 namespace Nop.Plugin.Payments.Stripe.Models
 {
     //[Validator(typeof(ConfigurationModelValidator))]
-    public class ConfigurationModel : BaseNopModel
+    public record ConfigurationModel : BaseNopModel
     {
         #region Ctor
 
