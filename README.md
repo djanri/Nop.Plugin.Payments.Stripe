@@ -4,7 +4,7 @@ This Payment provider supports Stripe's credit card payment gateway.
 
 ## Features
 
- - Uses Stripe's native client-side secure payment forms (Stripe.js + Elements) so no credit card numbers pass through the server
+ - Uses Stripe's native client-side secure payment forms (Stripe.js + Elements), so no credit card numbers pass through the server
  - Support for full and partial refunds
  - Postal code data automatically passes through to the Stripe forms, so the user doesn't have to reenter it on the Stripe form
  - Postal code and CVC verification are implemented
