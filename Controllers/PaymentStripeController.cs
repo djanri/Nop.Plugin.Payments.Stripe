@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Primitives;
@@ -56,10 +57,10 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
 
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
-        public IActionResult Configure()
+        public async Task<IActionResult> Configure()
         {
             //whether user has the authority
-            if (!_permissionService.Authorize(StandardPermissionProvider.ManagePaymentMethods))
+            if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePaymentMethods))
                 return AccessDeniedView();
 
             //prepare model
@@ -77,16 +78,16 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
         [HttpPost, ActionName("Configure")]
         [FormValueRequired("save")]
         [AuthorizeAdmin]
-        [AdminAntiForgery]
+        [AutoValidateAntiforgeryToken]
         [Area(AreaNames.Admin)]
-        public IActionResult Configure(ConfigurationModel model)
+        public async Task<IActionResult> Configure(ConfigurationModel model)
         {
             //whether user has the authority
-            if (!_permissionService.Authorize(StandardPermissionProvider.ManagePaymentMethods))
+            if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePaymentMethods))
                 return AccessDeniedView();
 
             if (!ModelState.IsValid)
-                return Configure();
+                return await Configure().ConfigureAwait(false);
 
             //save settings
            
@@ -98,7 +99,7 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
 #if NOP420
             _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Plugins.Saved"));
 #endif
-            return Configure();
+            return await Configure();
         }
 
 #endregion

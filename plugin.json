@@ -3,9 +3,9 @@
   "FriendlyName": "Stripe",
   "SystemName": "Payments.Stripe",
   "Version": "1.00",
-  "SupportedVersions": [ "4.20", "4.10" ],
+  "SupportedVersions": [ "4.60" ],
   "Author": "Andrej Kyselica",
   "DisplayOrder": 1,
   "FileName": "Nop.Plugin.Payments.Stripe.dll",
-  "Description": "This plugin allows paying with Stripe"
+  "Description": "From 4.1 on GITHUB"
 }
