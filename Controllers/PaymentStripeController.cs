@@ -1,12 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Primitives;
-using Nop.Core;
 using Nop.Plugin.Payments.Stripe.Models;
-using Nop.Services;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Messages;
@@ -22,9 +16,7 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
         #region Fields
 
         private readonly ILocalizationService _localizationService;
-#if NOP420
         private readonly INotificationService _notificationService;
-#endif
         private readonly IPermissionService _permissionService;
         private readonly ISettingService _settingService;
         private readonly StripePaymentProcessor _stripePaymentManager;
@@ -35,20 +27,16 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
 #region Ctor
 
         public PaymentStripeController(ILocalizationService localizationService,
-#if NOP420
             INotificationService notificationService,
-#endif
             IPermissionService permissionService,
             ISettingService settingService,
             StripePaymentSettings stripePaymentSettings)
         {
-            this._localizationService = localizationService;
-#if NOP420
-            this._notificationService = notificationService;
-#endif
-            this._permissionService = permissionService;
-            this._settingService = settingService;
-            this._stripePaymentSettings = stripePaymentSettings;
+            _localizationService = localizationService;
+            _notificationService = notificationService;
+            _permissionService = permissionService;
+            _settingService = settingService;
+            _stripePaymentSettings = stripePaymentSettings;
         }
 
 #endregion
@@ -56,7 +44,7 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
 #region Methods
 
         [AuthorizeAdmin]
-        [Area(AreaNames.Admin)]
+        [Area(AreaNames.ADMIN)]
         public async Task<IActionResult> Configure()
         {
             //whether user has the authority
@@ -79,7 +67,7 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
         [FormValueRequired("save")]
         [AuthorizeAdmin]
         [AutoValidateAntiforgeryToken]
-        [Area(AreaNames.Admin)]
+        [Area(AreaNames.ADMIN)]
         public async Task<IActionResult> Configure(ConfigurationModel model)
         {
             //whether user has the authority
@@ -96,12 +84,11 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
             _stripePaymentSettings.AdditionalFee = model.AdditionalFee;
             _stripePaymentSettings.AdditionalFeePercentage = model.AdditionalFeePercentage;
             _settingService.SaveSetting(_stripePaymentSettings);
-#if NOP420
-            _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Plugins.Saved"));
-#endif
+            _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Plugins.Saved"));
             return await Configure();
         }
 
 #endregion
+
     }
 }

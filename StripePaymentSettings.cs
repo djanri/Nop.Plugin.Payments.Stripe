@@ -1,5 +1,4 @@
 ﻿using Nop.Core.Configuration;
-//using Nop.Plugin.Payments.Stripe.Domain;
 
 namespace Nop.Plugin.Payments.Stripe
 {
@@ -12,6 +11,7 @@ namespace Nop.Plugin.Payments.Stripe
         /// Gets or sets OAuth2 application identifier
         /// </summary>
         public string SecretKey { get; set; }
+
         public string PublishableKey { get; set; }
         
         /// <summary>

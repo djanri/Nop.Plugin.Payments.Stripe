@@ -35,9 +35,7 @@ namespace Nop.Plugin.Payments.Stripe
         private readonly ILocalizationService _localizationService;
         private readonly ILogger _logger;
         private readonly IPaymentService _paymentService;
-    //    private readonly IPageHeadBuilder _pageHeadBuilder;
         private readonly ISettingService _settingService;
-    //    private readonly IScheduleTaskService _scheduleTaskService;
         private readonly IWebHelper _webHelper;
         private readonly StripePaymentSettings _stripePaymentSettings;
         private readonly IOrderTotalCalculationService _orderTotalCalculationService;
@@ -56,9 +54,7 @@ namespace Nop.Plugin.Payments.Stripe
             ILocalizationService localizationService,
             ILogger logger,
             IPaymentService paymentService,
-            //   IPageHeadBuilder pageHeadBuilder,
             ISettingService settingService,
-            //   IScheduleTaskService scheduleTaskService,
             IWebHelper webHelper,
             StripePaymentSettings stripePaymentSettings,
             IOrderTotalCalculationService orderTotalCalculationService,
@@ -66,18 +62,16 @@ namespace Nop.Plugin.Payments.Stripe
             IStateProvinceService stateProvinceService,
             ICountryService countryService)
         {
-            this._currencySettings = currencySettings;
-            this._currencyService = currencyService;
-            this._customerService = customerService;
-            this._genericAttributeService = genericAttributeService;
-            this._localizationService = localizationService;
-            this._logger = logger;
-            this._paymentService = paymentService;
-            //   this._pageHeadBuilder = pageHeadBuilder;
-            this._settingService = settingService;
-            //   this._scheduleTaskService = scheduleTaskService;
-            this._webHelper = webHelper;
-            this._stripePaymentSettings = stripePaymentSettings;
+            _currencySettings = currencySettings;
+            _currencyService = currencyService;
+            _customerService = customerService;
+            _genericAttributeService = genericAttributeService;
+            _localizationService = localizationService;
+            _logger = logger;
+            _paymentService = paymentService;
+            _settingService = settingService;
+            _webHelper = webHelper;
+            _stripePaymentSettings = stripePaymentSettings;
             _orderTotalCalculationService = orderTotalCalculationService;
             _addressService = addressService;
             _stateProvinceService = stateProvinceService;
@@ -145,7 +139,11 @@ namespace Nop.Plugin.Payments.Stripe
             throw new NotImplementedException("CancelRecurringPaymentAsync");
         }
 
-        public Task<bool> CanRePostProcessPaymentAsync(Order order) { return Task.FromResult(false); }
+        public Task<bool> CanRePostProcessPaymentAsync(Order order)
+        {
+            return Task.FromResult(false);
+        }
+
         public Task<CapturePaymentResult> CaptureAsync(CapturePaymentRequest capturePaymentRequest)
         {
             var result = new CapturePaymentResult();
@@ -153,6 +151,7 @@ namespace Nop.Plugin.Payments.Stripe
 
             return Task.FromResult(result);
         }
+
         public async Task<decimal> GetAdditionalHandlingFeeAsync(IList<ShoppingCartItem> cart)
         {
             var result = await _orderTotalCalculationService.CalculatePaymentAdditionalFeeAsync(cart,
@@ -187,8 +186,9 @@ namespace Nop.Plugin.Payments.Stripe
         }
 
         public Task PostProcessPaymentAsync(PostProcessPaymentRequest postProcessPaymentRequest)
-        { throw new NotImplementedException("PostProcessPaymentRequest"); }
-
+        {
+            throw new NotImplementedException("PostProcessPaymentRequest");
+        }
 
         public async Task<ProcessPaymentResult> ProcessPaymentAsync(ProcessPaymentRequest processPaymentRequest)
         {
@@ -238,7 +238,6 @@ namespace Nop.Plugin.Payments.Stripe
                 throw new NopException($"Charge error: {charge.FailureMessage}");
             }
         }
-
 
         public Task<ProcessPaymentResult> ProcessRecurringPaymentAsync(ProcessPaymentRequest processPaymentRequest)
         {
@@ -361,13 +360,6 @@ namespace Nop.Plugin.Payments.Stripe
 
             //locales
           await  _localizationService.DeleteLocaleResourcesAsync("Plugins.Payments.Stripe");
-            //_localizationService.DeletePluginLocaleResource("Plugins.Payments.Stripe.Fields.PublishableKey");
-            //_localizationService.DeletePluginLocaleResource("Plugins.Payments.Stripe.Fields.AdditionalFee");
-            //_localizationService.DeletePluginLocaleResource("Plugins.Payments.Stripe.Fields.AdditionalFee.Hint");
-            //_localizationService.DeletePluginLocaleResource("Plugins.Payments.Stripe.Fields.AdditionalFeePercentage");
-            //_localizationService.DeletePluginLocaleResource("Plugins.Payments.Stripe.Fields.AdditionalFeePercentage.Hint");
-            //_localizationService.DeletePluginLocaleResource("Plugins.Payments.Stripe.Instructions");
-            //_localizationService.DeletePluginLocaleResource("Plugins.Payments.Stripe.Fields.StripeToken.Key");
 
           await base.UninstallAsync();
         }

@@ -1,8 +1,7 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
+using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
 using Nop.Plugin.Payments.Stripe.Models;
 using Nop.Services.Common;
@@ -33,9 +32,9 @@ namespace Nop.Plugin.Payments.Stripe.Components
             ICustomerService customerService,
             IAddressService addressService)
         {
-            this._genericAttributeService = genericAttributeService;
-            this._localizationService = localizationService;
-            this._workContext = workContext;
+            _genericAttributeService = genericAttributeService;
+            _localizationService = localizationService;
+            _workContext = workContext;
             _addressService = addressService;
             _customerService = customerService;
         }
@@ -48,14 +47,14 @@ namespace Nop.Plugin.Payments.Stripe.Components
         {
 
             //!This is completely different.  Don't do it like this
-            var customer = await _workContext.GetCurrentCustomerAsync();
-            var billingAddress = await _addressService.GetAddressByIdAsync((int)customer.BillingAddressId);
-            var shippingAddress = await _addressService.GetAddressByIdAsync((int)customer.ShippingAddressId);
+            Customer customer = await _workContext.GetCurrentCustomerAsync();
+            Address billingAddress = await _addressService.GetAddressByIdAsync((int)customer.BillingAddressId);
+            Address shippingAddress = await _addressService.GetAddressByIdAsync((int)customer.ShippingAddressId);
             PaymentInfoModel model = new PaymentInfoModel
             {
                 //whether current customer is guest
 
-                IsGuest = (await _customerService.IsGuestAsync(customer)),
+                IsGuest = await _customerService.IsGuestAsync(customer),
                 
                 PostalCode = billingAddress?.ZipPostalCode ?? shippingAddress?.ZipPostalCode
             };
