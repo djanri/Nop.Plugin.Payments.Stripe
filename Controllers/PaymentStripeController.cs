@@ -13,18 +13,14 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
 {
     public class PaymentStripeController : BasePaymentController
     {
-        #region Fields
 
         private readonly ILocalizationService _localizationService;
         private readonly INotificationService _notificationService;
         private readonly IPermissionService _permissionService;
         private readonly ISettingService _settingService;
-        private readonly StripePaymentProcessor _stripePaymentManager;
         private readonly StripePaymentSettings _stripePaymentSettings;
 
-#endregion
 
-#region Ctor
 
         public PaymentStripeController(ILocalizationService localizationService,
             INotificationService notificationService,
@@ -39,9 +35,6 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
             _stripePaymentSettings = stripePaymentSettings;
         }
 
-#endregion
-
-#region Methods
 
         [AuthorizeAdmin]
         [Area(AreaNames.ADMIN)]
@@ -87,8 +80,6 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
             _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Plugins.Saved"));
             return await Configure();
         }
-
-#endregion
 
     }
 }
