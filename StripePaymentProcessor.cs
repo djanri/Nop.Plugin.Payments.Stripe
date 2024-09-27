@@ -302,7 +302,7 @@ namespace Nop.Plugin.Payments.Stripe
 
         public async Task<string> GetPaymentMethodDescriptionAsync()
         {
-            return await _localizationService.GetResourceAsync("Plugins.Payments.BetterStripe.PaymentMethodDescription");
+            return await _localizationService.GetResourceAsync("Plugins.Payments.Stripe.PaymentMethodDescription");
         }
 
         /// <summary>
@@ -328,6 +328,7 @@ namespace Nop.Plugin.Payments.Stripe
                 ["Plugins.Payments.Stripe.Fields.AdditionalFeePercentage"] = "Additional fee. Use percentage",
                 ["Plugins.Payments.Stripe.Fields.StripeToken.Key"] = "Stripe Token",
                 ["Plugins.Payments.Stripe.Fields.AdditionalFeePercentage.Hint"] = "Determines whether to apply a percentage additional fee to the order total. If not enabled, a fixed value is used.",
+                ["Plugins.Payments.Stripe.PaymentMethodDescription"] = "Pay by credit / debit card",
                 ["Plugins.Payments.Stripe.Instructions"] = @"
                 <p>
                      For plugin configuration follow these steps:<br />
