@@ -10,15 +10,13 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Copyright />
     <RepositoryType>git</RepositoryType>
-      <OutputPath>..\..\shop_go4trans\src\Presentation\Nop.Web\Plugins\Payments.Stripe</OutputPath>
-      <OutDir>$(OutputPath)</OutDir>
-      <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Payments.Stripe</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+    <!--Set this parameter to true to get the dlls copied from the NuGet cache to the output of your project. 
+    You need to set this parameter to true if your plugin has a nuget package 
+    to ensure that the dlls copied from the NuGet cache to the output of your project-->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-  <!-- This target execute after "Build" target -->
-  <Target Name="NopTarget" AfterTargets="Build">
-    <!-- Delete unnecessary libraries from plugins path -->
-    <MSBuild Projects="$(MSBuildProjectDirectory)..\..\shop_go4trans\src\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
-  </Target>
   <ItemGroup>
     <None Remove="Content\styles.css" />
     <None Remove="logo.png" />
@@ -48,14 +46,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-     <ClearPluginAssemblies Include="$(MSBuildProjectDirectory)\..\..\shop_go4trans\src\Build\ClearPluginAssemblies.proj" />
+    <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+     <ClearPluginAssemblies Include="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" />
  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Stripe.net" Version="45.14.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\shop_go4trans\src\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
-    <ProjectReference Include="..\..\shop_go4trans\src\Presentation\Nop.Web\Nop.Web.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="plugin.json">
