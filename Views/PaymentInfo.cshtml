@@ -102,7 +102,7 @@
                 }
             }
 
-            $('input.payment-info-next-step-button').on('click', function (data) {
+            $('button.payment-info-next-step-button').on('click', function (data) {
                 event.preventDefault();
 
                 stripe.createToken(card).then(function (result) {
