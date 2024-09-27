@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Version>1.00</Version>
+    <TargetFramework>net8.0</TargetFramework>
+    <Version>1.01</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/andrejpk/Nop.Payments.Stripe</RepositoryUrl>
     <!--Set this parameter to true to get the dlls copied from the NuGet cache to the output of your project.
@@ -10,13 +10,14 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Copyright />
     <RepositoryType>git</RepositoryType>
-      <OutputPath>..\..\Presentation\Nop.Web\Plugins\Payments.Stripe</OutputPath>
+      <OutputPath>..\..\shop_go4trans\src\Presentation\Nop.Web\Plugins\Payments.Stripe</OutputPath>
       <OutDir>$(OutputPath)</OutDir>
+      <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
   </PropertyGroup>
   <!-- This target execute after "Build" target -->
   <Target Name="NopTarget" AfterTargets="Build">
     <!-- Delete unnecessary libraries from plugins path -->
-    <MSBuild Projects="$(MSBuildProjectDirectory)..\..\nopCommerce\src\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
+    <MSBuild Projects="$(MSBuildProjectDirectory)..\..\shop_go4trans\src\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
   </Target>
   <ItemGroup>
     <None Remove="Content\styles.css" />
@@ -47,14 +48,14 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-     <ClearPluginAssemblies Include="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" />
+     <ClearPluginAssemblies Include="$(MSBuildProjectDirectory)\..\..\shop_go4trans\src\Build\ClearPluginAssemblies.proj" />
  </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Stripe.net" Version="41.10.0" />
+    <PackageReference Include="Stripe.net" Version="45.14.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
-    <ProjectReference Include="..\..\Presentation\Nop.Web\Nop.Web.csproj" />
+    <ProjectReference Include="..\..\shop_go4trans\src\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+    <ProjectReference Include="..\..\shop_go4trans\src\Presentation\Nop.Web\Nop.Web.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="plugin.json">

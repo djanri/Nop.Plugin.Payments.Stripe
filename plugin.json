@@ -2,10 +2,10 @@
   "Group": "Payment methods",
   "FriendlyName": "Stripe",
   "SystemName": "Payments.Stripe",
-  "Version": "1.00",
-  "SupportedVersions": [ "4.60" ],
+  "Version": "1.01",
+  "SupportedVersions": [ "4.70" ],
   "Author": "Andrej Kyselica",
   "DisplayOrder": 1,
   "FileName": "Nop.Plugin.Payments.Stripe.dll",
-  "Description": "From 4.1 on GITHUB"
+  "Description": "Plugin for stripe payments"
 }
