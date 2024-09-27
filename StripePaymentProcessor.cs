@@ -249,46 +249,43 @@ namespace Nop.Plugin.Payments.Stripe
         /// </summary>
         /// <param name="refundPaymentRequest"></param>
         /// <returns></returns>
-        /// 
-        public Task<RefundPaymentResult> RefundAsync(RefundPaymentRequest refundPaymentRequest)
-        { throw new NotImplementedException("RefundAsync"); }
-        //public RefundPaymentResult Refund(RefundPaymentRequest refundPaymentRequest)
-        //{
-        //    string chargeID = refundPaymentRequest.Order.AuthorizationTransactionId;
-        //    var orderAmtRemaining = refundPaymentRequest.Order.OrderTotal - refundPaymentRequest.AmountToRefund;
-        //    bool isPartialRefund = orderAmtRemaining > 0;
+        public async Task<RefundPaymentResult> RefundAsync(RefundPaymentRequest refundPaymentRequest)
+        {
+            string chargeID = refundPaymentRequest.Order.AuthorizationTransactionId;
+            var orderAmtRemaining = refundPaymentRequest.Order.OrderTotal - refundPaymentRequest.AmountToRefund;
+            bool isPartialRefund = orderAmtRemaining > 0;
 
-        //    if (!IsChargeID(chargeID))
-        //    {
-        //        throw new NopException($"Refund error: {chargeID} is not a Stripe Charge ID. Refund cancelled");
-        //    }
-        //    var service = new RefundService();
-        //    var refundOptions = new RefundCreateOptions
-        //    {
-        //        ChargeId = chargeID,
-        //        Amount = (long)(refundPaymentRequest.AmountToRefund * 100),
-        //        Reason = RefundReasons.RequestedByCustomer
-        //    };
-        //    var refund = service.Create(refundOptions, GetStripeApiRequestOptions());
+            if (!IsChargeID(chargeID))
+            {
+                throw new NopException($"Refund error: {chargeID} is not a Stripe Charge ID. Refund cancelled");
+            }
+            var service = new RefundService();
+            var refundOptions = new RefundCreateOptions
+            {
+                Charge = chargeID,
+                Amount = (long)(refundPaymentRequest.AmountToRefund * 100),
+                Reason = RefundReasons.RequestedByCustomer
+            };
+            var refund = await service.CreateAsync(refundOptions, GetStripeApiRequestOptions());
 
-        //    RefundPaymentResult result = new RefundPaymentResult();
+            RefundPaymentResult result = new RefundPaymentResult();
 
-        //    switch (refund.Status)
-        //    {
-        //        case "succeeded":
-        //            result.NewPaymentStatus = isPartialRefund ? PaymentStatus.PartiallyRefunded : PaymentStatus.Refunded;
-        //            break;
+            switch (refund.Status)
+            {
+                case "succeeded":
+                    result.NewPaymentStatus = isPartialRefund ? PaymentStatus.PartiallyRefunded : PaymentStatus.Refunded;
+                    break;
 
-        //        case "pending":
-        //            result.NewPaymentStatus = PaymentStatus.Pending;
-        //            result.AddError($"Refund failed with status of ${ refund.Status }");
-        //            break;
+                case "pending":
+                    result.NewPaymentStatus = PaymentStatus.Pending;
+                    result.AddError($"Refund failed with status of ${refund.Status}");
+                    break;
 
-        //        default:
-        //            throw new NopException("Refund returned a status of ${refund.Status}");
-        //    }
-        //    return result;
-        //}
+                default:
+                    throw new NopException("Refund returned a status of ${refund.Status}");
+            }
+            return result;
+        }
 
         public Task<IList<string>> ValidatePaymentFormAsync(IFormCollection form)
         {
