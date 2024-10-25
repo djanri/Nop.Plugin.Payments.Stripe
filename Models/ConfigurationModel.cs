@@ -29,6 +29,9 @@ namespace Nop.Plugin.Payments.Stripe.Models
         [NopResourceDisplayName("Plugins.Payments.Stripe.Fields.AdditionalFeePercentage")]
         public bool AdditionalFeePercentage { get; set; }
 
+        [NopResourceDisplayName("Plugins.Payments.Stripe.Fields.IsIndividualByVendor")]
+        public bool IsIndividualByVendor { get; set; }
+
         #endregion
     }
 }

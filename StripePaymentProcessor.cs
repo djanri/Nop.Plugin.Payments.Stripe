@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Nop.Core;
-using Nop.Core.Domain.Directory;
+using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
+using Nop.Core.Domain.Vendors;
 using Nop.Plugin.Payments.Stripe.Components;
+using Nop.Services.Attributes;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Customers;
@@ -17,6 +20,7 @@ using Nop.Services.Logging;
 using Nop.Services.Orders;
 using Nop.Services.Payments;
 using Nop.Services.Plugins;
+using Nop.Services.Vendors;
 using Stripe;
 
 namespace Nop.Plugin.Payments.Stripe
@@ -28,13 +32,13 @@ namespace Nop.Plugin.Payments.Stripe
     {
         #region Fields
 
-        private readonly CurrencySettings _currencySettings;
-        private readonly ICurrencyService _currencyService;
+        public const string STRIPE_SECRET_KEY = "StripeSecretKey (starts with sk_)";
+        public const string STRIPE_PUBLISHABLE_KEY = "StripePublishableKey (starts with pk_)";
+
+        
         private readonly ICustomerService _customerService;
-        private readonly IGenericAttributeService _genericAttributeService;
         private readonly ILocalizationService _localizationService;
         private readonly ILogger _logger;
-        private readonly IPaymentService _paymentService;
         private readonly ISettingService _settingService;
         private readonly IWebHelper _webHelper;
         private readonly StripePaymentSettings _stripePaymentSettings;
@@ -42,33 +46,36 @@ namespace Nop.Plugin.Payments.Stripe
         private readonly IAddressService _addressService;
         private readonly IStateProvinceService _stateProvinceService;
         private readonly ICountryService _countryService;
+        protected readonly IShoppingCartService _shoppingCartService;
+        protected readonly IVendorService _vendorService;
+        protected readonly IGenericAttributeService _genericAttributeService;
+        protected readonly IAttributeParser<VendorAttribute, VendorAttributeValue> _vendorAttributeParser;
+        protected readonly IAttributeService<VendorAttribute, VendorAttributeValue> _vendorAttributeService;
 
         #endregion
 
         #region Ctor
 
-        public StripePaymentProcessor(CurrencySettings currencySettings,
-            ICurrencyService currencyService,
+        public StripePaymentProcessor(
             ICustomerService customerService,
-            IGenericAttributeService genericAttributeService,
             ILocalizationService localizationService,
             ILogger logger,
-            IPaymentService paymentService,
             ISettingService settingService,
             IWebHelper webHelper,
             StripePaymentSettings stripePaymentSettings,
             IOrderTotalCalculationService orderTotalCalculationService,
             IAddressService addressService,
             IStateProvinceService stateProvinceService,
-            ICountryService countryService)
+            ICountryService countryService,
+            IShoppingCartService shoppingCartService,
+            IVendorService vendorService,
+            IGenericAttributeService genericAttributeService,
+            IAttributeParser<VendorAttribute, VendorAttributeValue> vendorAttributeParser,
+            IAttributeService<VendorAttribute,VendorAttributeValue> vendorAttributeService)
         {
-            _currencySettings = currencySettings;
-            _currencyService = currencyService;
             _customerService = customerService;
-            _genericAttributeService = genericAttributeService;
             _localizationService = localizationService;
             _logger = logger;
-            _paymentService = paymentService;
             _settingService = settingService;
             _webHelper = webHelper;
             _stripePaymentSettings = stripePaymentSettings;
@@ -76,6 +83,11 @@ namespace Nop.Plugin.Payments.Stripe
             _addressService = addressService;
             _stateProvinceService = stateProvinceService;
             _countryService = countryService;
+            _shoppingCartService = shoppingCartService;
+            _vendorService = vendorService;
+            _genericAttributeService = genericAttributeService;
+            _vendorAttributeParser = vendorAttributeParser;
+            _vendorAttributeService = vendorAttributeService;
         }
 
         #endregion
@@ -83,7 +95,7 @@ namespace Nop.Plugin.Payments.Stripe
         #region Utilities
 
         /// <summary>
-        /// Convert a NopCommere address to a Stripe API address
+        /// Convert a NopCommerce address to a Stripe API address
         /// </summary>
         /// <param name="nopAddress"></param>
         /// <returns></returns>
@@ -190,6 +202,32 @@ namespace Nop.Plugin.Payments.Stripe
             throw new NotImplementedException("PostProcessPaymentRequest");
         }
 
+        public async Task<string> GetVendorStripeValue(Core.Domain.Customers.Customer customer, int storeId, string stripeKey)
+        {
+            var cartItems = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, storeId);
+            if (cartItems.Any())
+            {
+                var cartItem = cartItems.First();
+                var vendor = await _vendorService.GetVendorByProductIdAsync(cartItem.ProductId);
+                if (vendor != null)
+                {
+                    var vendorAttributesXml = await _genericAttributeService.GetAttributeAsync<string>(vendor, NopVendorDefaults.VendorAttributes);
+                    if (!string.IsNullOrEmpty(vendorAttributesXml))
+                    {
+                        var vendorAttributes = await _vendorAttributeService.GetAllAttributesAsync();
+                        var keyAttr = vendorAttributes.FirstOrDefault(attr => string.Equals(attr.Name, stripeKey));
+                        if (keyAttr != null && keyAttr.AttributeControlType == AttributeControlType.TextBox)
+                        {
+                            var enteredText = _vendorAttributeParser.ParseValues(vendorAttributesXml, keyAttr.Id);
+                            if (enteredText.Any())
+                                return enteredText[0];
+                        }
+                    }
+                }
+            }
+            return await Task.FromResult(string.Empty);
+        }
+
         public async Task<ProcessPaymentResult> ProcessPaymentAsync(ProcessPaymentRequest processPaymentRequest)
         {
             //get customer
@@ -223,7 +261,16 @@ namespace Nop.Plugin.Payments.Stripe
                 };
             }
 
-            var charge = service.Create(chargeOptions, GetStripeApiRequestOptions());
+            var options = GetStripeApiRequestOptions();
+            if (_stripePaymentSettings.IsIndividualByVendor)
+            {
+                var secretKey = await GetVendorStripeValue(customer, processPaymentRequest.StoreId, STRIPE_SECRET_KEY);
+                if (!string.IsNullOrEmpty(secretKey))
+                {
+                    options.ApiKey = secretKey;
+                }
+            }
+            var charge = service.Create(chargeOptions, options);
 
             var result = new ProcessPaymentResult();
             if (charge.Status == "succeeded")
@@ -266,7 +313,20 @@ namespace Nop.Plugin.Payments.Stripe
                 Amount = (long)(refundPaymentRequest.AmountToRefund * 100),
                 Reason = RefundReasons.RequestedByCustomer
             };
-            var refund = await service.CreateAsync(refundOptions, GetStripeApiRequestOptions());
+            var options = GetStripeApiRequestOptions();
+            if (_stripePaymentSettings.IsIndividualByVendor)
+            {
+                var customer = await _customerService.GetCustomerByIdAsync(refundPaymentRequest.Order.CustomerId);
+                if (customer != null)
+                {
+                    var secretKey = await GetVendorStripeValue(customer, refundPaymentRequest.Order.StoreId, STRIPE_SECRET_KEY);
+                    if (!string.IsNullOrEmpty(secretKey))
+                    {
+                        options.ApiKey = secretKey;
+                    }
+                }
+            }
+            var refund = await service.CreateAsync(refundOptions, options);
 
             RefundPaymentResult result = new RefundPaymentResult();
 
@@ -326,8 +386,9 @@ namespace Nop.Plugin.Payments.Stripe
                 ["Plugins.Payments.Stripe.Fields.AdditionalFee"] = "Additional fee",
                 ["Plugins.Payments.Stripe.Fields.AdditionalFee.Hint"] = "Enter additional fee to charge your customers.",
                 ["Plugins.Payments.Stripe.Fields.AdditionalFeePercentage"] = "Additional fee. Use percentage",
-                ["Plugins.Payments.Stripe.Fields.StripeToken.Key"] = "Stripe Token",
                 ["Plugins.Payments.Stripe.Fields.AdditionalFeePercentage.Hint"] = "Determines whether to apply a percentage additional fee to the order total. If not enabled, a fixed value is used.",
+                ["Plugins.Payments.Stripe.Fields.IsIndividualByVendor"] = "Use keys from vendor settings instead of these",
+                ["Plugins.Payments.Stripe.Fields.StripeToken.Key"] = "Stripe Token",
                 ["Plugins.Payments.Stripe.PaymentMethodDescription"] = "Pay by credit / debit card",
                 ["Plugins.Payments.Stripe.Instructions"] = @"
                 <p>
@@ -336,7 +397,7 @@ namespace Nop.Plugin.Payments.Stripe
                     1. If you haven't already, create an account on Stripe.com and sign in<br />
                     2. In the Developers menu (left), choose the API Keys option.
                     3. You will see two keys listed, a Publishable key and a Secret key. You will need both. (If you'd like, you can create and use a set of restricted keys. That topic isn't covered here.)
-                    <em>Stripe supports test keys and production keys. Use whichever pair is appropraite. There's no switch between test/sandbox and proudction other than using the appropriate keys.</em>
+                    <em>Stripe supports test keys and production keys. Use whichever pair is appropriate. There's no switch between test/sandbox and production other than using the appropriate keys.</em>
                     4. Paste these keys into the configuration page of this plug-in. (Both keys are required.) 
                     <br />
                     <em>Note: If using production keys, the payment form will only work on sites hosted with HTTPS. (Test keys can be used on http sites.) If using test keys, 
@@ -344,7 +405,27 @@ namespace Nop.Plugin.Payments.Stripe
                 </p>"
             });
 
-           await base.InstallAsync();
+            
+            var allVendorAttributes = await _vendorAttributeService.GetAllAttributesAsync();
+            if (!allVendorAttributes.Any(attr => string.Equals(attr.Name, STRIPE_SECRET_KEY)))
+            {
+                var secretKeyAttr = new VendorAttribute
+                {
+                    Name = STRIPE_SECRET_KEY,
+                    AttributeControlType = AttributeControlType.TextBox
+                };
+                await _vendorAttributeService.InsertAttributeAsync(secretKeyAttr);
+            }
+            if (!allVendorAttributes.Any(attr => string.Equals(attr.Name, STRIPE_PUBLISHABLE_KEY)))
+            {
+                var publishableKeyKeyAttr = new VendorAttribute
+                {
+                    Name = STRIPE_PUBLISHABLE_KEY,
+                    AttributeControlType = AttributeControlType.TextBox
+                };
+                await _vendorAttributeService.InsertAttributeAsync(publishableKeyKeyAttr);
+            }
+            await base.InstallAsync();
         }
 
 

@@ -25,6 +25,8 @@ namespace Nop.Plugin.Payments.Stripe.Models
         [NopResourceDisplayName("Plugins.Payments.Stripe.Fields.PostalCode")]
         public string PostalCode { get; set; }
 
+        public string VendorPublishableKey { get; set; }
+
         //[NopResourceDisplayName("Plugins.Payments.Stripe.Fields.SaveCard")]
         //public bool SaveCard { get; set; }
 

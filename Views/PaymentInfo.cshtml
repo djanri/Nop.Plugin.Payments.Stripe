@@ -41,10 +41,10 @@
 
             $('.payment-info-next-step-button').attr('onclick', null);
 
-
             console.log('stripe loaded');
             // Create a Stripe client.
-            var stripe = Stripe('@stripePaymentSettings.PublishableKey');
+            var stripeKey = '@(stripePaymentSettings.IsIndividualByVendor ? Model.VendorPublishableKey : stripePaymentSettings.PublishableKey)';
+            var stripe = Stripe(stripeKey);
 
             // Create an instance of Elements.
             var elements = stripe.elements();
@@ -83,8 +83,6 @@
                     displayError.textContent = '';
                 }
             });
-
-
 
             // Submit the form with the token ID.
             function stripeTokenHandler(token) {

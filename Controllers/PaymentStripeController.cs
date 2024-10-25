@@ -50,7 +50,8 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
                 SecretKey = _stripePaymentSettings.SecretKey,
                 PublishableKey = _stripePaymentSettings.PublishableKey,
                 AdditionalFee = _stripePaymentSettings.AdditionalFee,
-                AdditionalFeePercentage = _stripePaymentSettings.AdditionalFeePercentage
+                AdditionalFeePercentage = _stripePaymentSettings.AdditionalFeePercentage,
+                IsIndividualByVendor = _stripePaymentSettings.IsIndividualByVendor
             };
 
             return View("~/Plugins/Payments.Stripe/Views/Configure.cshtml", model);
@@ -76,6 +77,7 @@ namespace Nop.Plugin.Payments.Stripe.Controllers
             _stripePaymentSettings.PublishableKey = model.PublishableKey;
             _stripePaymentSettings.AdditionalFee = model.AdditionalFee;
             _stripePaymentSettings.AdditionalFeePercentage = model.AdditionalFeePercentage;
+            _stripePaymentSettings.IsIndividualByVendor = model.IsIndividualByVendor;
             _settingService.SaveSetting(_stripePaymentSettings);
             _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Plugins.Saved"));
             return await Configure();
