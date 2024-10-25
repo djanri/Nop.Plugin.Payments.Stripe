@@ -8,6 +8,7 @@ This Payment provider supports Stripe's credit card payment gateway.
  - Support for full and partial refunds
  - Postal code data automatically passes through to the Stripe forms, so the user doesn't have to reenter it on the Stripe form
  - Postal code and CVC verification are implemented
+ - You can choose to pay through vendors directly. Be carefully here! Take into account, the vendor is taken from the first product in the cart.
  
 ## Limitations
 
